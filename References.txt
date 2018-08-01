@@ -1,0 +1,12 @@
+References:
+
+
+- http://www.statisticshowto.com/probability-and-statistics/skewed-distribution/
+
+- https://www.statmethods.net/stats/correlations.html
+
+- https://stackoverflow.com/questions/34797041/r-combined-geom-vline-and-geom-smooth-in-legend
+
+- P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. 
+  Modeling wine preferences by data mining from physicochemical properties.
+  In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.

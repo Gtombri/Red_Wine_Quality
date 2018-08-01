@@ -1,0 +1,697 @@
+Red Wine Quality Analysis
+========================================================
+by Gerrit Tombrink
+
+
+# Introduction
+
+This dataset was used for a Udacity project and the dataset is publicly available for research. All details are described in (Cortez et al., 2009), see:
+
+(P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. Modeling wine preferences by data mining from physicochemical properties.
+In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.)
+
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+# load packages
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+```
+
+```{r}
+# load the data
+rw_data <- read.csv("wineQualityReds.csv")
+```
+
+
+The dataset consists of the following variables and data formats:
+
+```{r}
+# overview of dataset
+str(rw_data)
+```
+
+The statistics for each variable are as follows:
+
+```{r}
+# summary of data
+summary(rw_data)
+```
+
+
+Overall, this red wine dataset contains 1599 red wines including 11 chemical variables with the following units:
+
+- fixed acidity (tartaric acid - g / dm^3)
+
+- volatile acidity (acetic acid - g / dm^3)
+
+- citric acid (g / dm^3)
+
+- residual sugar (g / dm^3)
+
+- chlorides (sodium chloride - g / dm^3
+
+- free sulfur dioxide (mg / dm^3)
+
+- total sulfur dioxide (mg / dm^3)
+
+- density (g / cm^3)
+
+- pH
+
+- sulphates (potassium sulphate - g / dm3)
+
+- alcohol (% by volume)
+
+In addition, the quality of the wine was recorded by a score between 1 and 12 (see quality column). Based on these variables, the aim of this report is to analyze the correlation between the chemical properties and the quality of the red wines.
+
+
+
+
+# Univariate Plots Section
+
+```{r}
+# combine two datasets into a new variable 
+rw_data$total.acidity <- rw_data$fixed.acidity + rw_data$volatile.acidity
+```
+
+
+```{r}
+# plot red wine quality
+qplot(x = quality, data = rw_data, geom = "bar")
+```
+
+```{r}
+# print summary of red wine quality
+summary(rw_data$quality)
+```
+
+According to the dataset description, the wine quality scale is usually between 0 and 12. This red wine dataset does not use the total wine quality scale: With the help of this red wine quality plot, it can be shown that the lowest quality value is 3 and the maximum quality value is 8. The median of this variable is 6.
+
+```{r}
+# plot histograms
+v1 <- ggplot(aes(x = fixed.acidity), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v2 <- ggplot(aes(x = volatile.acidity), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v3 <- ggplot(aes(x = total.acidity), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v4 <- ggplot(aes(x = citric.acid), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v5 <- ggplot(aes(x = residual.sugar), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v6 <- ggplot(aes(x = chlorides), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v7 <- ggplot(aes(x = free.sulfur.dioxide), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v8 <- ggplot(aes(x = total.sulfur.dioxide), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v9 <- ggplot(aes(x = density), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v10 <- ggplot(aes(x = pH), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v11 <- ggplot(aes(x = sulphates), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+v12 <- ggplot(aes(x = alcohol), data = rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+
+grid.arrange(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12)
+```
+
+Each of the histograms shown here can be summarized as follows:
+
+- Fixed acidity: it is a low right skewed histogram
+
+- Volatile acidity: it is a low right skewed histogram
+
+- Total acidity: it is a low right skewed histogram
+
+- Citric acid: it is a strong right skewed histogram with the highest peak at 0.0
+
+- Residual sugar: it is a strong right skewed histogram with the highest peaks between 0 and 4
+
+- Chlorides: it is a strong right skewed histogram with the highest peaks between 0 and 0.1
+
+- Free sulfur dioxide: it is a strong right skewed histogram
+
+- Total sulfur dioxide: it is a strong right skewed histogram
+
+- Density: the values are almost normal distributed
+
+- pH: the values are almost normal distributed
+
+- Sulphates: it is a right-skewed histogram
+
+- Alcohol: it is a right-skewed histogram
+
+
+The distributions of values within the histograms show that only the values of "density" and "pH" are almost normally distributed.
+
+### Rescaling variables
+```{r}
+# resacaling with log
+log_rw_data <- rw_data
+log_rw_data$log_fixed.acidity = log(log_rw_data$fixed.acidity)
+log_rw_data$log_volatile.acidity = log(log_rw_data$volatile.acidity)
+log_rw_data$log_citric.acid = log(log_rw_data$citric.acid)
+log_rw_data$log_residual.sugar = log(log_rw_data$residual.sugar)
+log_rw_data$log_chlorides = log(log_rw_data$chlorides)
+log_rw_data$log_free.sulfur.dioxide = log(log_rw_data$free.sulfur.dioxide)
+log_rw_data$log_total.sulfur.dioxide = log(log_rw_data$total.sulfur.dioxide)
+log_rw_data$log_sulphates = log(log_rw_data$sulphates)
+log_rw_data$log_alcohol = log(log_rw_data$alcohol)
+
+# plot histograms
+rv1 <- ggplot(aes(x = log_fixed.acidity), data = log_rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+rv2 <- ggplot(aes(x = log_volatile.acidity), data = log_rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+rv3 <- ggplot(aes(x = log_citric.acid), data = log_rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+rv4 <- ggplot(aes(x = log_residual.sugar), data = log_rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+rv5 <- ggplot(aes(x = log_chlorides), data = log_rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+rv6 <- ggplot(aes(x = log_free.sulfur.dioxide), data = log_rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+rv7 <- ggplot(aes(x = log_total.sulfur.dioxide), data = log_rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+rv8 <- ggplot(aes(x = log_sulphates), data = log_rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+rv9 <- ggplot(aes(x = log_alcohol), data = log_rw_data)+
+  geom_histogram(color =I('black'),fill = I('blue'))
+
+grid.arrange(rv1, rv2, rv3, rv4, rv5, rv6, rv7, rv8, rv9)
+```
+ 
+The log function helps to plot more normal distributed histograms.
+
+
+# Univariate Analysis
+
+Overall, the dataset contains 1599 red wines including 11 chemical variables and one variable about the wine quality. The wine quality variable based on ratings by experts. However, this quality classification is not based on a measurement but on a subjective perception of the expert. Therefore, it makes sense to correlate this subjective variable with the measured chemical variables. 
+
+Two (density and pH) of the eleven chemical variables are almost normally distributed. Within all histograms, there are no bimodal or multimodal distributions. Therefore, a reclassification should not be preferred. Because the dataset separate fixed and volatile acidity, a combination of both into a total amount variable could help to understand the distribution of this variable. Therefore, both variables were summed and implemented as a variable "total.acidity" in the dataset. Additionally, with the help of log functions skewed histograms could be transformed into an almost normal distribution.
+
+
+
+
+# Bivariate Plots Section
+
+
+To plot and correlate each variables' impact on quality, the following Figures were created:
+
+### Variable: Fixed acidity
+
+```{r}
+# plot fixed acidity
+ggplot(aes(x = quality, y = fixed.acidity), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+  
+```
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$fixed.acidity, method = "pearson")
+```
+
+The correlation coefficient of the variable fixed acidity is 0.1240516. This variable has no meaningful impact.
+
+
+
+### Variable: Volatile acidity
+```{r}
+# plot volatile acidity
+ggplot(aes(x = quality, y = volatile.acidity), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$volatile.acidity, method = "pearson")
+```
+
+The correlation coefficient of the variable volatile acidity is -0.3905578. This variable has a small impact.
+
+
+
+### Variable: Total acidity
+
+```{r}
+# plot total acidity
+ggplot(aes(x = quality, y = total.acidity), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$total.acidity, method = "pearson")
+```
+
+The correlation coefficient of the variable total acidity is 0.08570932. This variable has no meaningful impact.
+
+
+
+### Variable: Citric acid
+
+```{r}
+# plot citric acid
+ggplot(aes(x = quality, y = citric.acid), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$citric.acid, method = "pearson")
+```
+
+The correlation coefficient of the variable citric acid is 0.2263725. This variable has a very small impact.
+
+
+
+### Variable: Residual sugar
+
+```{r}
+# plot residual sugar
+ggplot(aes(x = quality, y = residual.sugar), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$residual.sugar, method = "pearson")
+```
+
+The correlation coefficient of the variable residual sugar is 0.01373164. This variable has no meaningful impact.
+
+
+
+### Variable: Chlorides
+
+```{r}
+# plot chlorides
+ggplot(aes(x = quality, y = chlorides), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$chlorides, method = "pearson")
+```
+
+The correlation coefficient of the variable chlorides is -0.1289066. This variable has no meaningful impact.
+
+
+
+### Variable: Free sulfur dioxide
+
+```{r}
+# plot free sulfur dioxide
+ggplot(aes(x = quality, y = free.sulfur.dioxide), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$free.sulfur.dioxide, method = "pearson")
+```
+
+The correlation coefficient of the variable free sulfur dioxide is -0.05065606. This variable has no meaningful impact.
+
+
+
+### Variable: Total sulfur dioxide
+
+```{r}
+# plot total sulfur dioxide
+ggplot(aes(x = quality, y = total.sulfur.dioxide), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$total.sulfur.dioxide, method = "pearson")
+```
+
+The correlation coefficient of the variable total sulfur dioxide is -0.1851003. This variable has no meaningful impact.
+
+
+
+### Variable: Density
+
+```{r}
+# plot density
+ggplot(aes(x = quality, y = density), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$density, method = "pearson")
+```
+
+The correlation coefficient of the variable density is -0.1749192. This variable has no meaningful impact.
+
+
+
+### Variable: pH
+
+```{r}
+# plot pH
+ggplot(aes(x = quality, y = pH), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$pH, method = "pearson")
+```
+
+The correlation coefficient of the variable pH is -0.05773139. This variable has no meaningful impact.
+
+
+
+### Variable: Sulphates
+
+```{r}
+# plot sulphates
+ggplot(aes(x = quality, y = sulphates), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$sulphates, method = "pearson")
+```
+
+The correlation coefficient of the variable sulphates is 0.2513971. This variable has a very small impact.
+
+
+
+### Variable: Alcohol
+
+```{r}
+# plot alcohol
+ggplot(aes(x = quality, y = alcohol), data = rw_data) +
+  geom_jitter(alpha = 1/5) +
+  geom_smooth(method = "lm", color = "red") + 
+  geom_line(stat = "summary", fun.y = median, color = "blue")
+```
+
+```{r}
+# calculate correlation
+cor.test(rw_data$quality, rw_data$alcohol, method = "pearson")
+```
+
+The correlation coefficient of the variable alcohol is 0.4761663. This variable has a small to moderate impact.
+
+
+
+
+# Bivariate Analysis
+
+As a result of these analyses it could be clarified that the following variables have higher correlations to the variable "quality":
+
+- 1. Alcohol has a correlation of 0.4761663 to "quality" (small to moderate impact).
+
+- 2. Volatile acidity has a correlation of -0.3905578 to "quality" (small impact).
+
+- 3. Sulphates have a correlation of 0.2513971 to "quality" (very small impact).
+
+- 4. Citric acid has a correlation of 0.2263725 to "quality" (very small impact).
+ 
+
+The variable alcohol has the biggest impact on the quality of the red wine. This can be clarified with the median distribution:
+
+```{r}
+# grouping of the variable quality
+quality_goups <- group_by(rw_data, quality)
+
+# calculation and print table of mean and median of alcohol
+rw_data.by_quality <- summarise(quality_goups,
+                                alcohol_mean = mean(alcohol),
+                                alcohol_median = median(alcohol),
+                                n = n())
+rw_data.by_quality <- arrange(rw_data.by_quality, quality)
+head(rw_data.by_quality)
+```
+
+```{r}
+# plot median of alcohol vs. quality
+ggplot(aes(x = quality, y = alcohol_median), data = rw_data.by_quality) +
+  geom_line()
+```
+
+This plot shows that an increasing alcohol content is associated with a higher quality of the red wine. 
+
+
+
+Additional evidence about dependencies between different variables provides a correlation matrix:
+
+```{r}
+cor(rw_data)
+```
+
+This table illustrates that the correlations between fixed / volatile acidity and citric acid are high. Furthermore, the correlation between fixed acidity and density as well as pH are high. Also, a high correlation between free sulfur dioxide and total sulfur dioxide exists. The strongest correlation coefficient of all variables can be found between fixed acidity and pH ( = 0.68297819).
+
+
+In addition, a few variables were plotted among each other to clarify possible relationships:
+
+```{r}
+#plot variables including grading (quality of wine)
+ggplot(aes(x = citric.acid, y = volatile.acidity), data = rw_data) +
+  geom_jitter(alpha = 1/5)+
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "Blue")+
+  scale_fill_discrete(name = "")
+```
+
+With increasing citric acid, volatile acidity decreases. These two variables do not influence the quality of the red wine.
+
+
+
+```{r}
+#plot variables including grading (quality of wine)
+ggplot(aes(x = pH, y = fixed.acidity), data = rw_data) +
+  geom_jitter(alpha = 1/5)+
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "Blue")+
+  scale_fill_discrete(name = "")
+```
+
+With increasing pH, fixed acidity decreases. These two variables do not influence the quality of the red wine.
+
+
+
+```{r}
+#plot variables including grading (quality of wine)
+ggplot(aes(x = citric.acid, y = fixed.acidity), data = rw_data) +
+  geom_jitter(alpha = 1/5)+
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "Blue")+
+  scale_fill_discrete(name = "")
+```
+
+With increasing citric acid, fixed acidity increases. These two variables do not influence the quality of the red wine.
+
+
+
+```{r}
+#plot variables including grading (quality of wine)
+ggplot(aes(x = citric.acid, y = volatile.acidity), data = rw_data) +
+  geom_jitter(alpha = 1/5)+
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "Blue")+
+  scale_fill_discrete(name = "")
+  #geom_smooth(method = "lm", aes(color = "Smoothed conditional means"))
+```
+
+With increasing citric acid, volatile acidity decreases. These two variables do not influence the quality of the red wine.
+
+
+
+
+# Multivariate Plots and Analysis
+
+```{r}
+# use quality variable for a new variable (gradings)
+rw_data$grading<-cut(rw_data$quality, 
+                          c(2.5,3.5,4.5,5.5,6.5,7.5,8.5),
+                          labels=c('3','4','5','6','7','8'))
+```
+
+We use the results of the analysis before and plot the variables with the highest correlation to the variable "quality" (alcohol, volatile acidity, sulphates and citric acid) altogether:
+
+```{r}
+#plot alcohol and volatile acidity with grading (quality of wine)
+ggplot(aes(x = alcohol, y = volatile.acidity), data = rw_data) +
+  geom_point(aes(color = grading))+
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "black")+
+  scale_color_brewer(type='seq', guide=guide_legend(title='Quality levels'))+
+  scale_fill_discrete(name = "")
+```
+
+This plot shows that a higher alcohol content is accompanied by a higher quality of the wine (see quality levels). However, with increasing alcohol content, volatile acidity decreases slightly. The correlation between alcohol and volatile acidity is -0.202288027 (see table).
+
+
+
+```{r}
+#plot alcohol and sulphates with grading (quality of wine)
+ggplot(aes(x = alcohol, y = sulphates), data = rw_data) +
+  geom_point(aes(color = grading))+
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "black")+
+  scale_color_brewer(type='seq', guide=guide_legend(title='Quality levels'))+
+  scale_fill_discrete(name = "")
+```
+
+This plot shows that a higher alcohol content is accompanied by a higher quality of the wine (see quality levels). However, with increasing alcohol content, sulphates increases slightly. The correlation between alcohol and sulphates is 0.093594750 (see table).
+
+
+
+```{r}
+#plot alcohol and citric acid with grading (quality of wine)
+ggplot(aes(x = alcohol, y = citric.acid), data = rw_data) +
+  geom_point(aes(color = grading))+
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "black")+
+  scale_color_brewer(type='seq', guide=guide_legend(title='Quality levels'))+
+  scale_fill_discrete(name = "")
+```
+
+This plot shows that a higher alcohol content is accompanied by a higher quality of the wine (see quality levels). However, with increasing alcohol content, citric acids increases slightly. The correlation between alcohol and citric acid is 0.10990325 (see table).
+
+
+
+```{r}
+#plot variables including grading (quality of wine)
+ggplot(aes(x = alcohol, y = density), data = rw_data) +
+  geom_point(aes(color = grading))+
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "black")+
+  scale_color_brewer(type='seq', guide=guide_legend(title='Quality levels'))+
+  scale_fill_discrete(name = "")
+```
+
+Because the correlation between alcohol and density is high (-0.4961797) these variables were plotted. This plot shows that a higher alcohol content is accompanied by a higher quality of the red wine (see quality levels). However, with increasing alcohol content, density decreases.
+
+
+The above multivariate analysis illustrates the following:
+
+- A higher alcohol correlates with a higher quality of wine
+
+- As the alcohol content and quality of wine increases, volatile acidity decreases slightly.
+
+- As the alcohol content and quality of wine increases, sulphates increases slightly.
+
+- As the alcohol content and quality of wine increases, citric acids increases slightly.
+
+- As the alcohol content and quality of wine increases, density decreases.
+
+
+
+
+# Final Plots and Summary
+
+### Plot One: Alcohol and Quality
+
+```{r Plot_One}
+ggplot(aes(x = quality, y = alcohol, color = grading), data = rw_data) +
+  geom_jitter(alpha = 1/2) +
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "black")+
+  scale_color_brewer(type='seq', guide=guide_legend(title='Quality levels'))+
+  scale_fill_discrete(name = "")+
+  ylab('Alcohol (% by volume)') +
+  xlab('Quality') +
+  ggtitle("Alcohol and Quality")
+```
+
+An alternative plot:
+
+```{r}
+ggplot(aes(x = quality, y = alcohol, color = grading), data = rw_data) +
+  geom_boxplot()+
+  ylab('Alcohol (% by volume)') +
+  xlab('Quality') +
+  ggtitle("Alcohol and Quality")
+```
+
+### Description One
+These plots were generated to illustrate the relationships between alcohol content and the quality of the red wine. It shows that the alcohol content increases with increasing quality of the red wine.
+
+
+
+
+### Plot Two: Sulphates and Quality
+
+```{r Plot_Two}
+ggplot(aes(x = quality, y = sulphates, color = grading), data = rw_data) +
+  geom_jitter(alpha = 1/2) +
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "black")+
+  scale_color_brewer(type='seq', guide=guide_legend(title='Quality levels'))+
+  scale_fill_discrete(name = "")+
+  ylab('Sulphates (potassium sulphate - g / dm3)') +
+  xlab('Quality') +
+  ggtitle("Sulphates and Quality")
+```
+
+An alternative plot:
+
+```{r}
+ggplot(aes(x = quality, y = sulphates, color = grading), data = rw_data) +
+  geom_boxplot() +
+  ylab('Sulphates (potassium sulphate - g / dm3)') +
+  xlab('Quality') +
+  ggtitle("Sulphates and Quality")
+```
+
+### Description Two
+These plots were generated to illustrate the relationships between sulphates and the quality of the red wine. Interestingly, sulphates increase with higher red wine quality.
+
+
+
+
+### Plot Three: Citric Acid and Quality
+
+```{r}
+ggplot(aes(x = quality, y = citric.acid, color = grading), data = rw_data) +
+  geom_jitter(alpha = 1/2) +
+  geom_smooth(aes(fill= "Smoothed means"), method = "lm", color = "black")+
+  scale_color_brewer(type='seq', guide=guide_legend(title='Quality levels'))+
+  scale_fill_discrete(name = "")+
+  ylab('Citric acid (g / dm^3') +
+  xlab('Quality') +
+  ggtitle("Citric Acid and Quality")
+```
+
+An alternative plot:
+
+```{r Plot_Three}
+ggplot(aes(x = quality, y = citric.acid, color = grading), data = rw_data) +
+  geom_boxplot()+
+  ylab('Citric acid (g / dm^3') +
+  xlab('Quality') +
+  ggtitle("Citric Acid and Quality")
+```
+
+### Description Three
+These plots were generated to illustrate the relationships between citric acid and the quality of the red wine. It shows that the citric acid increases with increasing quality of the red wine.
+
+
+
+
+# Reflection
+
+Overall, these analyzes have shown that the alcohol content has a measurable influence on the quality of a red wine - it increases with increasing quality of the red wine. The correlation between "alcohol" and the subjective variable "quality" is 0.4761663. Consequently "alcohol" has a small to moderate impact on red wine quality. 
+In addition to "alcohol", "citric acid" and "sulphates" have a very small impact on the quality of red wine and increases with increasing quality of the red wine.
+In addition, it should be noted that the variable of red wine quality is based on subjective perceptions of wine experts. Through a possible subjective conclusion by experts, inaccuracies can occur within this variable, which can also have a total impact on all the analyzes listed here. For future wine evaluations, a quantitative assessment by many experts would be useful: This would reduce the subjective influence and consequently a false conclusion. In addition to the alcohol content, the red wine quality is probably affected by the wine age and storage. Consequently, these variables should also be measured to gain more insights during future analysis.
+Finally, these analyzes have expanded my knowledge of the red wine quality.
